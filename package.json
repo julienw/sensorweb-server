@@ -6,6 +6,7 @@
   "scripts": {
     "debug": "nodemon -q --watch src --exec babel-node -- --inspect src/server.js",
     "coverage": "./node_modules/.bin/nyc report --reporter=text-lcov | ./node_modules/coveralls/bin/coveralls.js",
+    "lint": "eslint src test",
     "prestart": "./scripts/prestart.sh",
     "posttest": "./scripts/posttest.sh",
     "pretest": "./scripts/pretest.sh",
@@ -29,6 +30,7 @@
     "co": "^4.6.0",
     "co-mocha": "^1.1.3",
     "coveralls": "^2.11.14",
+    "eslint": "^3.12.0",
     "istanbul": "^0.4.5",
     "mocha": "^3.1.0",
     "nock": "^9.0.2",
