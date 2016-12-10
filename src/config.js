@@ -46,12 +46,12 @@ const conf = convict({
   db: {
     host: {
       doc: 'Hostname where PostgreSQL is running',
-      format: 'url',
+      format: '*',
       default: 'localhost'
     },
     port: {
       doc: 'Port where PostgreSQL is running',
-      format: 'port',
+      format: '*',
       default: 5432
     },
     name: {
