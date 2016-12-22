@@ -64,6 +64,17 @@ const conf = convict({
       doc: 'Database password'
     }
   },
+  facebook: {
+    clientId: {
+      doc: 'Facebook clientId'
+    },
+    clientSecret: {
+      doc: 'Facebook clientSecret'
+    },
+  },
+  publicHost: {
+    doc: 'Public host for this server, especially for auth callback'
+  },
   sensorthings: {
     server: {
       doc: 'SensorThings remote API server',
