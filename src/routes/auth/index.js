@@ -1,87 +1,32 @@
 import express  from 'express';
 
-import basic    from './basic';
-import facebook from './facebook';
+import db       from '../../models/db';
+import { ApiError, FORBIDDEN, ERRNO_FORBIDDEN } from '../../errors';
 
-import config   from '../../config';
+import { finalizeAuth } from './utils';
 
 const router = express.Router();
 
-router.use('/basic', basic);
+router.post('/', (req, res) => {
+  db()
+    .then(models => {
+      const { AUTH_PROVIDER, BASIC, authenticate } = models.Users;
 
-if (config.get('facebook.clientID')) {
-  router.use('/facebook', facebook);
-}
+      if (req.headers.authorization) {
+        // For now we only accept basic authentication and only for the
+        // admin user.
+        const pass = req.headers.authorization.substr('Basic '.length);
 
-router.get('/', (req, res) => {
-  res.type('html');
-  res.send(`
-    <!doctype html>
-    <html>
-      <head>
-        <title>Login</title>
-        <style>
-          .facebook {
-            color: white;
-            background-color: #3b5998;
-          }
+        return authenticate(BASIC, pass);
+      }
 
-          .twitter {
-            color: black;
-            background-color: #1da1f2;
-          }
-        </style>
-      </head>
-      <body>
-        <div class='loggedin' hidden></div>
-        <div class='providers' hidden>
-        <button type='button' class='facebook' data-provider='facebook'>
-          Login with Facebook
-        </button>
-        <!--
-        <button type='button' class='twitter' data-provider='twitter'>
-          Login with Twitter
-        </button>
-        -->
-        </div>
-        <script>
-          function checkTokenExists() {
-            const providers = document.querySelector('.providers');
-            const loggedin = document.querySelector('.loggedin');
-
-            if (localStorage.token) {
-              providers.hidden = true;
-              loggedin.hidden = false;
-              loggedin.textContent =
-                "logged in with token " + localStorage.token;
-              const clearButton = document.createElement('button');
-              clearButton.type = 'button';
-              clearButton.textContent = 'clear';
-              loggedin.appendChild(clearButton)
-            } else {
-              providers.hidden = false;
-              loggedin.hidden = true;
-            }
-          }
-
-          document.querySelector('.providers').addEventListener('click', e => {
-            if (e.target.tagName === 'BUTTON') {
-              window.open('${req.baseUrl}/' + e.target.dataset.provider);
-            }
-          });
-          document.querySelector('.loggedin').addEventListener('click', e => {
-              if (e.target.tagName === 'BUTTON') {
-                localStorage.removeItem('token');
-                checkTokenExists();
-              }
-          });
-
-          checkTokenExists();
-          window.addEventListener('storage', checkTokenExists);
-        </script>
-      </body>
-    </html>
-  `);
+      const { provider, token } = req.body;
+      return authenticate(AUTH_PROVIDER, { provider, token });
+    })
+    .then(
+      finalizeAuth(res),
+      err => ApiError(res, 403, ERRNO_FORBIDDEN, FORBIDDEN, err.message)
+    );
 });
 
 export default router;

@@ -1,14 +1,16 @@
-import btoa     from 'btoa';
-
 import config   from '../config';
 import {
   UNAUTHORIZED,
-  UNSUPPORTED_AUTH_METHOD
+  UNSUPPORTED_AUTH_METHOD,
 } from '../errors';
+
+import { basic, providers } from '../auth';
 
 // Supported authentication methods.
 const authMethods = {
-  BASIC: ({ username, password }) => {
+  BASIC: (encodedPass) => {
+    const { username, password } = basic(encodedPass);
+
     // For now we only support admin authentication.
     if (username !== 'admin' || password !== config.get('adminPass')) {
       return Promise.reject(new Error(UNAUTHORIZED));
@@ -20,11 +22,17 @@ const authMethods = {
     });
   },
 
-  AUTH_PROVIDER: (data) => {
-    return Promise.resolve({
-      id: data,
-      scope: 'user'
-    });
+  AUTH_PROVIDER: ({ provider, token }) => {
+    const providerVerify = providers[provider];
+    if (!providerVerify) {
+      return Promise.reject(new Error(`Provider "${provider}" is unknown.`));
+    }
+
+    return providerVerify(token)
+      .then(opaqueId => ({
+        id: { opaqueId, provider },
+        scope: 'user'
+      }));
   },
 };
 

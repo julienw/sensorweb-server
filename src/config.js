@@ -20,6 +20,15 @@ const password = value => {
   }
 };
 
+convict.addFormat({
+  name: 'hex',
+  validate: function(val) {
+    if (/[^a-fA-F0-9]/.test(val)) {
+      throw new Error('must be a hex key');
+    }
+  }
+});
+
 const conf = convict({
   adminPass: {
     doc: 'The password for the admin user. Follow OWASP guidelines for passwords',
@@ -66,14 +75,13 @@ const conf = convict({
   },
   facebook: {
     clientId: {
-      doc: 'Facebook clientId'
+      doc: 'Facebook clientId',
+      format: 'nat',
     },
     clientSecret: {
-      doc: 'Facebook clientSecret'
+      doc: 'Facebook clientSecret',
+      format: 'hex'
     },
-  },
-  publicHost: {
-    doc: 'Public host for this server, especially for auth callback'
   },
   sensorthings: {
     server: {

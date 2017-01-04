@@ -3,7 +3,6 @@
   "adminSessionSecret": "default",
   "env": "dev",
   "port": 8080,
-  "publicHost": "http://localhost:8080",
   "db": {
     "host": "localhost",
     "port": 5432,
